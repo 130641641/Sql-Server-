@@ -1,0 +1,80 @@
+--日付
+SELECT * FROM テーブル
+WHERE   create_dt >= TO_date('20181231010000','YYYYMMDDHH24miss');
+
+
+--更新外部結合
+    UPDATE
+       対象テーブル A
+    SET
+        user_id = (SELECT user_id
+                   FROM  参照テーブル B
+                   WHERE A.company_id = B.company_id)
+    WHERE
+        user_name = 'テスト' 
+    AND
+        user_id IS NULL;
+
+
+--更新内部結合
+UPDATE
+(
+  SELECT 
+    t1.NAME t1name, t1.FURIGANA t1furigana, t1.SEIBETSU t1seibetsu,
+    t2.NAME t2name, t2.FURIGANA t2furigana, t2.SEIBETSU t2seibetsu
+  FROM
+    table01 t1
+  INNER JOIN 
+    table02 t2
+  ON 
+    t1.id = t2.id
+)
+SET t1name = t2name, t1furigana = t2furigana
+WHERE t1seibetsu = '女';
+
+
+--テーブルバックアップ
+CREATE TABLE 対象テーブル
+AS SELECT * FROM 参照テーブル;
+
+
+
+--複数内部連結
+SELECT
+    tbl6.*
+FROM
+    テーブル tbl6
+    INNER JOIN (
+        SELECT DISTINCT
+            tbl4.カラム
+        FROM
+            テーブル tbl4
+            INNER JOIN (
+                SELECT
+                    tbl2.*
+                FROM
+                    テーブル tbl2
+                    INNER JOIN (
+                        SELECT
+                            *
+                        FROM
+                            テーブル
+                        WHERE
+                            日付 = '201801'
+                            AND   TO_CHAR(日付,'YYYYMMDDHH24mmss') >= '20181231010000'
+                    ) tbl1 ON tbl2.カラム = tbl1.カラム
+            ) tbl3 ON tbl4.カラム = tbl3.カラム
+        ORDER BY
+            tbl4.カラム
+    ) tbl5 ON tbl6.カラム = tbl5.カラム ;
+    
+    
+
+--単数内部結合
+SELECT tbl2.* FROM テーブル tbl2
+    INNER JOIN (
+        SELECT * FROM 参照テーブル
+        WHERE
+            日付 = '201801'
+            AND   日付 >= TO_DATE('20180101100000','YYYYMMDDHH24miss')
+    ) tbl1 ON tbl2.カラム = tbl1.カラム;
